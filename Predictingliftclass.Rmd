@@ -1,0 +1,65 @@
+---
+title: "Predicting lift class"
+author: "Luke Cullina"
+date: "February 27, 2016"
+output: html_document
+---
+
+Test
+
+First I imported the training and testing data that I had downloaded from {the source}. I ignored the first 7 columns for predictive purposes {because ...}.
+```{r,cache = TRUE, warning = FALSE}
+set.seed(1881)
+library(caret)
+
+training <- read.csv("pml-training.csv")
+testing <- read.csv("pml-testing.csv")
+
+#training <- training[sample(1:nrow(training),3200,replace = FALSE),8:160]
+training <- training[,8:160]
+testing <- testing[,8:160]
+
+```
+
+The next step was to iterate through the columns of the training and testing data to get rid of "NA" values (by converting them to 0), and change all columns to class numeric.
+```{r,cache = TRUE, warning = FALSE}
+
+i <- 1
+
+for(i in i:ncol(training)){
+        training[which(is.na(training[,i]) == TRUE), i] <- 0        
+        
+}
+
+i <- 1
+
+for(i in i:ncol(testing)){
+        testing[which(is.na(testing[,i]) == TRUE), i] <- 0        
+        
+}
+
+
+i <- 1
+
+for(i in i:(ncol(training)-1)){
+        training[,i] <- as.numeric(training[,i])        
+        
+}
+
+i <- 1
+
+for(i in i:(ncol(testing)-1)){
+        testing[,i] <- as.numeric(testing[,i])        
+        
+}
+```
+
+Finally I fit a random forest model on the training data.
+```{r, cache= TRUE, warning = FALSE}
+modelFit.oob <- train(classe ~ ., data = training, method = "rf", trControl = trainControl(method = "oob"))
+
+modelFit.oob$finalModel
+
+```
+
+
