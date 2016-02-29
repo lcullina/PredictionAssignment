@@ -1,13 +1,17 @@
 ---
-title: "Predicting lift class"
+title: "Predicting Lift Class"
 author: "Luke Cullina"
 date: "February 27, 2016"
 output: html_document
 ---
 
-Test
 
-First I imported the training and testing data that I had downloaded from {the source}. I ignored the first 7 columns for predictive purposes {because ...}.
+
+The purpose of this assignment was to use the weightlifting dataset from  http://groupware.les.inf.puc-rio.br/har to predict the class (A, B, C, D, or E) a given bicep curl would fall into. 
+
+Information on the experiment and the different classes is available at the link above.
+
+To attack this problem, first I imported the training and testing data that I had downloaded from the source above. I ignored the first 7 columns for predictive purposes, as I was interested only in variables that measured movement.
 ```{r,cache = TRUE, warning = FALSE}
 set.seed(1881)
 library(caret)
@@ -28,33 +32,22 @@ i <- 1
 
 for(i in i:ncol(training)){
         training[which(is.na(training[,i]) == TRUE), i] <- 0        
-        
+        training[,i] <- as.numeric(training[,i]) 
 }
 
 i <- 1
 
 for(i in i:ncol(testing)){
-        testing[which(is.na(testing[,i]) == TRUE), i] <- 0        
+        testing[which(is.na(testing[,i]) == TRUE), i] <- 0      
+        testing[,i] <- as.numeric(testing[,i]) 
         
 }
 
-
-i <- 1
-
-for(i in i:(ncol(training)-1)){
-        training[,i] <- as.numeric(training[,i])        
-        
-}
-
-i <- 1
-
-for(i in i:(ncol(testing)-1)){
-        testing[,i] <- as.numeric(testing[,i])        
-        
-}
 ```
 
-Finally I fit a random forest model on the training data.
+I then fit a random forest model on the training data. For my method of cross validation, I utilized "out-of-bag" resampling. I chose this because it was computationally efficient and still produced a very satisfactory model.
+
+Cross validation is used to try to minimize test-set RMSE, without using the actual test set, which would introduce risks of overfitting.
 ```{r, cache= TRUE, warning = FALSE}
 modelFit.oob <- train(classe ~ ., data = training, method = "rf", trControl = trainControl(method = "oob"))
 
@@ -62,4 +55,16 @@ modelFit.oob$finalModel
 
 ```
 
+The estimated out of bag error rate is 0.39%, which is remarkably low. Accordingly, we can be very confident in the class predictions of our model.
+
+I used the predict function to apply our model to the testing data:
+```{r, cache = TRUE, warning = FALSE}
+predictions <- predict(modelFit.oob, newdata = testing)
+```
+
+The 100% accurate results were as follows:
+
+```{r}
+predictions
+```
 
